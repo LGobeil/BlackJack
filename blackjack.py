@@ -123,7 +123,7 @@ def first_deal(shoe):
 def player_turn(name, hand, shoe):
 
     player_bust = False
-    while player_bust is False:
+    while not player_bust:
         vocabulary = {'Hit': 'h', 'hit': 'h', 'H': 'h', 'h': 'h',
                       'Stand': 's', 'stand': 's', 'S': 's', 's': 's'}
         action = input('Hit or Stand: ')
