@@ -18,9 +18,6 @@ class Card:
 
     __repr__ = __str__
 
-    def card_value(self):
-        pass
-
 
 class Shoe:
 
@@ -87,7 +84,13 @@ class Hand:
         return score
 
     def __str__(self):
-        return str(self._cards)
+        hand_string = ''
+        for card in self._cards:
+
+            hand_string += str(card)
+            hand_string += '\t'
+
+        return hand_string
 
 
 def build_deck():
@@ -120,7 +123,7 @@ def first_deal(shoe):
     return player_hand, dealer_hand
 
 
-def player_turn(name, hand, shoe):
+def player_turn(name, hand, shoe, player, dealer):
 
     player_bust = False
     while not player_bust:
@@ -132,20 +135,23 @@ def player_turn(name, hand, shoe):
             if player_action == 'h':
                 print(name + ' Hits')
                 hand.add_card(shoe)
+                state(player, dealer)
                 if hand.score > 21:
                     print(name + ' busts')
                     player_bust = True
+                    state(player, dealer)
                     return player_bust
                 elif hand.score == 21:
                     break
             else:
                 print(name + ' Stands')
+                state(player, dealer)
                 break
         else:
             print('Not a valid action')
 
 
-def dealer_turn(dealer_hand, player_score, player_name, shoe):
+def dealer_turn(dealer_hand, player_score, player_name, shoe, player, dealer):
 
     dealer_hand.add_card(shoe)
     dealer_score = dealer_hand.score
@@ -155,31 +161,55 @@ def dealer_turn(dealer_hand, player_score, player_name, shoe):
             dealer_score = dealer_hand.score
             print('Dealer takes a card')
         if dealer_score > 21:
+            state(player, dealer)
             print('Dealer busts\n' + player_name + ' wins!')
         elif 21 >= dealer_score > player_score:
+            state(player, dealer)
             print('Dealer wins!')
         elif dealer_score == player_score:
+            state(player, dealer)
             print('Push')
         else:
+            state(player, dealer)
             print(player_name + ' wins')
     else:
+        state(player, dealer)
         print('Dealer wins')
 
 
 def game_start():
 
-    deck = build_deck()
-    shoe = Shoe(deck)
-    shoe.shuffle()
     dealer = Dealer()
     player = Player(input('Enter your name: '))
-    player.hand, dealer.hand = first_deal(shoe)
     print(player)
     print(dealer)
     print('-'*40)
-    player_turn(player.name, player.hand, shoe)
-    dealer_turn(dealer.hand, player.hand.score, player.name, shoe)
-    pass
+    game_loop(player, dealer)
+
+
+def game_loop(player, dealer):
+    game_num = 0
+    while game_num < 6:
+
+        game_num += 1
+        print('Game number: ' + str(game_num))
+        deck = build_deck()
+        shoe = Shoe(deck)
+        shoe.shuffle()
+        player.hand, dealer.hand = first_deal(shoe)
+        state(player, dealer)
+        player_turn(player.name, player.hand, shoe, player, dealer)
+        state(player, dealer)
+        dealer_turn(dealer.hand, player.hand.score, player.name, shoe, player, dealer)
+        state(player, dealer)
+
+
+def state(player, dealer):
+
+    print(dealer.hand)
+    print(player.hand)
+    print('Dealer has {}\n{} has {}'.format(dealer.hand.score, player.name, player.hand.score))
+    print('*'*40)
 
 
 if __name__ == '__main__':
